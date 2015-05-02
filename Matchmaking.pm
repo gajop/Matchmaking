@@ -65,7 +65,19 @@ sub init {
   slog("Using matchmaking plugin, closing battle...", 3); 
   closeBattle("Running in Queue mode...");
   
-  my $queue = { "gameNames" => [ "ba:stable" ], "mapNames" => [ "DSD" ] , "engineVersions" => [ "101" ], "title" => "BADSD24/7", "description" => "Join the grind", "minPlayers" => 10, "maxPlayers" => 30, "teamJoinAllowed" => \1 };
+  my $queue = { "name" => "BADSD1", "gameNames" => [ "Balanced Annihilation V8.12" ], "mapNames" => [ "DeltaSiegeDry" ] , "engineVersions" => [ "101" ], "title" => "BADSD24/7", "description" => "Join the grind", "minPlayers" => 10, "maxPlayers" => 30, "teamJoinAllowed" => \1 };
+  $self->addQueue($queue);
+  $queue = { "name" => "BADSD2", "gameNames" => [ "Balanced Annihilation V8.12" ], "mapNames" => [ "DeltaSiegeDry" ] , "engineVersions" => [ "101" ], "title" => "BA 1v1", "description" => "Join the grind", "minPlayers" => 10, "maxPlayers" => 30, "teamJoinAllowed" => \1 };
+  $self->addQueue($queue);
+  
+  $queue = { "name" => "CURSED", "gameNames" => [ "Cursed v5" ], "mapNames" => [ "DeltaSiegeDry" ] , "engineVersions" => [ "101" ], "title" => "Cursed", "description" => "Join the grind", "minPlayers" => 10, "maxPlayers" => 30, "teamJoinAllowed" => \1 };
+  $self->addQueue($queue);
+  $queue = { "name" => "EVONORMAL", "gameNames" => [ "EvolutionRTS v1" ], "mapNames" => [ "DeltaSiegeDry" ] , "engineVersions" => [ "101" ], "title" => "EvolutionRTS", "description" => "Join the grind", "minPlayers" => 10, "maxPlayers" => 30, "teamJoinAllowed" => \1 };
+  $self->addQueue($queue);
+  $queue = { "name" => "MYGAME", "gameNames" => [ "My New game v1" ], "mapNames" => [ "DeltaSiegeDry" ] , "engineVersions" => [ "101" ], "title" => "My new game!", "description" => "Join the grind", "minPlayers" => 10, "maxPlayers" => 30, "teamJoinAllowed" => \1 };
+  $self->addQueue($queue);
+  
+  $queue = { "name" => "MANYGAMES", "gameNames" => [ "EvolutionRTS v1", "Balanced Annihilation V8.12", "Cursed 3" ], "mapNames" => [ "DeltaSiegeDry" ] , "engineVersions" => [ "101" ], "title" => "Bunch of games", "description" => "Join the grind", "minPlayers" => 10, "maxPlayers" => 30, "teamJoinAllowed" => \1 };
   $self->addQueue($queue);
 }
 
@@ -92,12 +104,12 @@ sub hLobbyOpenQueue {
 
     my $obj = parseJsonCmd(@_);
 
-	my $queueId = $obj->{queueId};
+	my $name = $obj->{name};
 	
     my $queue = $self->{tmpQueue};
-    $queue->{queueId} = $queueId;
+    $queue->{name} = $name;
     $queue->{users} = [];    
-    $self->{queues}->{$queueId} = $queue;
+    $self->{queues}->{$name} = $queue;
 }
 
 sub hLobbyJoinQueueRequest {
@@ -108,17 +120,17 @@ sub hLobbyJoinQueueRequest {
 
     my $obj = parseJsonCmd(@_);
 
-    my $queueId = $obj->{queueId};
+    my $name = $obj->{name};
     my $userNames = $obj->{userNames};
 
-    my $queue = $self->{queues}->{$queueId};    
-    push @{$queue->{users}}, $userNames;    
+    my $queue = $self->{queues}->{$name};
+    push @{$queue->{users}}, $userNames;
 
 	# accept everyone
-	queueLobbyCommand(['JOINQUEUEACCEPT', encode_json({queueId => $queueId+0, userNames => $userNames})]);
+	queueLobbyCommand(['JOINQUEUEACCEPT', encode_json({name => $name, userNames => $userNames})]);
 
 	# ready check someplace else
-	queueLobbyCommand(['READYCHECK', encode_json({queueId => $queueId+0, userNames => $userNames, "responseTime" => 5})]);
+	queueLobbyCommand(['READYCHECK', encode_json({name => $name, userNames => $userNames, "responseTime" => 5})]);
 }
 
 sub hLobbyQueueLeft {
@@ -129,10 +141,10 @@ sub hLobbyQueueLeft {
     
     my $obj = parseJsonCmd(@_);
 
-    my $queueId = \$obj->{queueId};
+    my $name = \$obj->{name};
     my $userName = $obj->{userName};
         
-    my $queue = $self->{queues}->{$queueId};
+    my $queue = $self->{queues}->{$name};
     
     #$queue->
 }
@@ -145,11 +157,11 @@ sub hLobbyReadyCheckResponse {
     
 	my $obj = parseJsonCmd(@_);
     
-    my $queueId = $obj->{queueId};
+    my $name = $obj->{name};
     my $userName = $obj->{userName};
     my $response = $obj->{response};
     
-    my $queue = $self->{queues}->{$queueId};
+    my $queue = $self->{queues}->{$name};
     
     # TODO: check if all people have responded
     my $userNames = [];
@@ -162,7 +174,7 @@ sub hLobbyReadyCheckResponse {
 			$result = "fail";
 		}
     
-    queueLobbyCommand(['READYCHECKRESULT', encode_json({"queueId" => $queueId+0, "userNames" => $userNames, "result" => $result})]);
+    queueLobbyCommand(['READYCHECKRESULT', encode_json({"name" => $name, "userNames" => $userNames, "result" => $result})]);
     
     $self->spawnGame($queue, $userNames);
     
@@ -178,7 +190,10 @@ sub spawnGame {
 	my $ip = "127.0.0.1";
 	my $port = "40";	
 	
-	my $gameInstance = SpringAutoHostInterface->new();
+	my $gameInstance = SpringAutoHostInterface->new(
+        autoHostPort => $port,
+        );
+#	$gameInstance->
 	
 	foreach my $userName (@{$userNames}) {
         my $password = "randomGen";
@@ -199,8 +214,8 @@ sub onUnload {
 	my $self = getPlugin();
 	slog("Unloading...", 3);
 	while (my ($key, $queue) = each $self->{queues}) {
-		slog("Closing queue {queueId:" . ($queue->{queueId}+0) . "}...", 3);
-		queueLobbyCommand(['CLOSEQUEUE', encode_json({"queueId" => $queue->{queueId}+0})]);
+		slog("Closing queue {name:" . $queue->{name} . "}...", 3);
+		queueLobbyCommand(['CLOSEQUEUE', encode_json({"name" => $queue->{name}+0})]);
 	}
 }
 
