@@ -65,19 +65,19 @@ sub init {
   slog("Using matchmaking plugin, closing battle...", 3); 
   closeBattle("Running in Queue mode...");
   
-  my $queue = { "name" => "BADSD1", "gameNames" => [ "Balanced Annihilation V8.12" ], "mapNames" => [ "DeltaSiegeDry" ] , "engineVersions" => [ "101" ], "title" => "BADSD24/7", "description" => "Join the grind", "minPlayers" => 10, "maxPlayers" => 30, "teamJoinAllowed" => \1 };
+  my $queue = { "name" => "BADSD1", "gameNames" => [ "Balanced Annihilation V8.12" ], "mapNames" => [ "DeltaSiegeDry" ] , "engineVersions" => [ "101" ], "title" => "BADSD24/7", "description" => "Join the grind", "minPlayers" => 10, "maxPlayers" => 30, "teamJoinAllowed" => JSON::PP::true };
   $self->addQueue($queue);
-  $queue = { "name" => "BADSD2", "gameNames" => [ "Balanced Annihilation V8.12" ], "mapNames" => [ "DeltaSiegeDry" ] , "engineVersions" => [ "101" ], "title" => "BA 1v1", "description" => "Join the grind", "minPlayers" => 10, "maxPlayers" => 30, "teamJoinAllowed" => \1 };
-  $self->addQueue($queue);
-  
-  $queue = { "name" => "CURSED", "gameNames" => [ "Cursed v5" ], "mapNames" => [ "DeltaSiegeDry" ] , "engineVersions" => [ "101" ], "title" => "Cursed", "description" => "Join the grind", "minPlayers" => 10, "maxPlayers" => 30, "teamJoinAllowed" => \1 };
-  $self->addQueue($queue);
-  $queue = { "name" => "EVONORMAL", "gameNames" => [ "EvolutionRTS v1" ], "mapNames" => [ "DeltaSiegeDry" ] , "engineVersions" => [ "101" ], "title" => "EvolutionRTS", "description" => "Join the grind", "minPlayers" => 10, "maxPlayers" => 30, "teamJoinAllowed" => \1 };
-  $self->addQueue($queue);
-  $queue = { "name" => "MYGAME", "gameNames" => [ "My New game v1" ], "mapNames" => [ "DeltaSiegeDry" ] , "engineVersions" => [ "101" ], "title" => "My new game!", "description" => "Join the grind", "minPlayers" => 10, "maxPlayers" => 30, "teamJoinAllowed" => \1 };
+  $queue = { "name" => "BADSD2", "gameNames" => [ "Balanced Annihilation V8.12" ], "mapNames" => [ "DeltaSiegeDry" ] , "engineVersions" => [ "101" ], "title" => "BA 1v1", "description" => "Join the grind", "minPlayers" => 10, "maxPlayers" => 30, "teamJoinAllowed" => JSON::PP::true };
   $self->addQueue($queue);
   
-  $queue = { "name" => "MANYGAMES", "gameNames" => [ "EvolutionRTS v1", "Balanced Annihilation V8.12", "Cursed 3" ], "mapNames" => [ "DeltaSiegeDry" ] , "engineVersions" => [ "101" ], "title" => "Bunch of games", "description" => "Join the grind", "minPlayers" => 10, "maxPlayers" => 30, "teamJoinAllowed" => \1 };
+  $queue = { "name" => "CURSED", "gameNames" => [ "Cursed v5" ], "mapNames" => [ "DeltaSiegeDry" ] , "engineVersions" => [ "101" ], "title" => "Cursed", "description" => "Join the grind", "minPlayers" => 10, "maxPlayers" => 30, "teamJoinAllowed" => JSON::PP::true };
+  $self->addQueue($queue);
+  $queue = { "name" => "EVONORMAL", "gameNames" => [ "EvolutionRTS v1" ], "mapNames" => [ "DeltaSiegeDry" ] , "engineVersions" => [ "101" ], "title" => "EvolutionRTS", "description" => "Join the grind", "minPlayers" => 10, "maxPlayers" => 30, "teamJoinAllowed" => JSON::PP::true };
+  $self->addQueue($queue);
+  $queue = { "name" => "MYGAME", "gameNames" => [ "My New game v1" ], "mapNames" => [ "DeltaSiegeDry" ] , "engineVersions" => [ "101" ], "title" => "My new game!", "description" => "Join the grind", "minPlayers" => 10, "maxPlayers" => 30, "teamJoinAllowed" => JSON::PP::true };
+  $self->addQueue($queue);
+  
+  $queue = { "name" => "MANYGAMES", "gameNames" => [ "EvolutionRTS v1", "Balanced Annihilation V8.12", "Cursed 3" ], "mapNames" => [ "DeltaSiegeDry" ] , "engineVersions" => [ "101" ], "title" => "Bunch of games", "description" => "Join the grind", "minPlayers" => 10, "maxPlayers" => 30, "teamJoinAllowed" => JSON::PP::true };
   $self->addQueue($queue);
 }
 
@@ -215,7 +215,7 @@ sub onUnload {
 	slog("Unloading...", 3);
 	while (my ($key, $queue) = each $self->{queues}) {
 		slog("Closing queue {name:" . $queue->{name} . "}...", 3);
-		queueLobbyCommand(['CLOSEQUEUE', encode_json({"name" => $queue->{name}+0})]);
+		queueLobbyCommand(['CLOSEQUEUE', encode_json({"name" => $queue->{name}})]);
 	}
 }
 
